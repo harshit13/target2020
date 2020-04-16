@@ -25,13 +25,14 @@ async function handleRequest(request) {
   let ind = Math.floor(Math.random() * n);
 
   // again fetch content from selected url
-  let data = await fetch(urls[ind])
-    .then(function(response) {
-      return response.text();
-    });
+  let data = await fetch(urls[ind]);
+    // .then(function(response) {
+      // return response.text();
+    // });
 
   // return the response
-  return new Response(data, {
-    headers: { 'content-type': 'text/html' },
-  })
+  // return new Response(data, {
+    // headers: { 'content-type': 'text/html' },
+  // })
+  return data;
 }
