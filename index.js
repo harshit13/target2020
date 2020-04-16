@@ -34,5 +34,68 @@ async function handleRequest(request) {
   // return new Response(data, {
     // headers: { 'content-type': 'text/html' },
   // })
-  return data;
+  let newdata = new HTMLRewriter()
+    .on("title", new Title(ind+1))
+    .on("h1#title", new Heading(ind+1))
+    .on("p#description", new Description(ind+1))
+    .on("a#url", new Link(ind+1))
+    .transform(data);
+  return newdata;
+}
+
+class Title {
+  constructor(ind) {
+    this.ind = ind;
+  }
+  text(text) {
+    if (text.lastInTextNode) {
+      text.replace("Web Page" + this.ind);
+    } else {
+      text.remove();
+    }
+  }
+}
+
+class Heading {
+  constructor(ind) {
+    this.ind = ind;
+  }
+  text(text) {
+    if (text.lastInTextNode) {
+      text.replace("HARSHIT's Web Page" + this.ind)
+    } else {
+      text.remove();
+    }
+  }
+}
+
+class Description {
+  constructor(ind) {
+    this.ind = ind;
+  }
+  text(text) {
+    if (text.lastInTextNode) {
+      text.replace(
+        "This is the variant " 
+        + this.ind + " for my submission for this project");
+    } else {
+      text.remove();
+    }
+  }
+}
+
+class Link {
+  constructor(ind) {
+    this.ind = ind;
+  }
+  element(elem) {
+    elem.setAttribute("href", "https://harshit13.github.io/");
+  }
+  text(text) {
+    if (text.lastInTextNode) {
+      text.replace("GOTO Harshit's Personal Webpage");
+    } else {
+      text.remove();
+    }
+  }
 }
