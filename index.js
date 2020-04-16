@@ -7,6 +7,15 @@ addEventListener('fetch', event => {
  */
 async function handleRequest(request) {
 
+  // check for available url cookie
+  // and respond with the version for the url
+  let cookie = request.headers.get('Cookie');
+  if ( cookie != null ) {
+    let url = cookie.split("=")[1].split(",")[0];
+    let resp = await fetch(url);
+    return resp;
+  }
+
   // get urls from /api/variants
   let urls = await fetch("https://cfw-takehome.developers.workers.dev/api/variants")
     .then(function(response){
@@ -25,22 +34,27 @@ async function handleRequest(request) {
   let ind = Math.floor(Math.random() * n);
 
   // again fetch content from selected url
-  let data = await fetch(urls[ind]);
-    // .then(function(response) {
-      // return response.text();
-    // });
+  let data = await fetch(urls[ind])
 
   // return the response
   // return new Response(data, {
     // headers: { 'content-type': 'text/html' },
   // })
+
   let newdata = new HTMLRewriter()
     .on("title", new Title(ind+1))
     .on("h1#title", new Heading(ind+1))
     .on("p#description", new Description(ind+1))
     .on("a#url", new Link(ind+1))
     .transform(data);
+
+  let header = 'url=' + urls[ind];
+
+  // using set cookie on local has some issue
+  // due to http instead of https
+  newdata.headers.append('Cookie', [header, 'HttpOnly', 'Secure']);
   return newdata;
+
 }
 
 class Title {
