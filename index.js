@@ -7,15 +7,6 @@ addEventListener('fetch', event => {
  */
 async function handleRequest(request) {
 
-  // check for available url cookie
-  // and respond with the version for the url
-  let cookie = request.headers.get('Cookie');
-  if ( cookie != null ) {
-    let url = cookie.split("=")[1].split(",")[0];
-    let resp = await fetch(url);
-    return resp;
-  }
-
   // get urls from /api/variants
   let urls = await fetch("https://cfw-takehome.developers.workers.dev/api/variants")
     .then(function(response){
@@ -28,11 +19,28 @@ async function handleRequest(request) {
       console.log("Error- Unable to fetch /api/variants");
       return "err";
     });
+  
+  
 
   // get each url with equal probability
   let n = urls.length;
   let ind = Math.floor(Math.random() * n);
 
+  // OR if available get last persisted url
+  // check for available url cookie
+  // and respond with the version for the url
+  let cookie = request.headers.get('Cookie');
+  if ( cookie != null ) {
+    let cookies = cookie.split(";");
+    for ( var i = 0; i < cookies.length; i++ ) {
+      var cookiePair = cookies[i].split("=");
+      if ( cookiePair[0].trim() == "url" ) {
+        ind = parseInt(cookiePair[1].trim());
+      }
+    }
+    // ind = parseInt(url_ind.split("=")[1].split(",")[0]);
+  }
+  console.log(cookie)
   // again fetch content from selected url
   let data = await fetch(urls[ind])
 
@@ -48,11 +56,10 @@ async function handleRequest(request) {
     .on("a#url", new Link(ind+1))
     .transform(data);
 
-  let header = 'url=' + urls[ind];
+  let header = 'url=' + ind;
 
-  // using set cookie on local has some issue
-  // due to http instead of https
-  newdata.headers.append('Cookie', [header, 'HttpOnly', 'Secure']);
+  // set url cookie, to visit same url
+  newdata.headers.set('Set-Cookie', header);
   return newdata;
 
 }
@@ -91,7 +98,7 @@ class Description {
     if (text.lastInTextNode) {
       text.replace(
         "This is the variant " 
-        + this.ind + " for my submission for this project");
+        + this.ind + " for my submission for this project ");
     } else {
       text.remove();
     }
