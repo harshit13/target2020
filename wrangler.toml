@@ -1,0 +1,6 @@
+name = "target2020"
+type = "javascript"
+account_id = "53255e006bbcf27303a5897d7a6d4de6"
+workers_dev = true
+route = ""
+zone_id = ""
